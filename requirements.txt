@@ -1,0 +1,100 @@
+# ═══════════════════════════════════════════════════════
+# OTTLI Bot — Complete requirements.txt
+# ═══════════════════════════════════════════════════════
+
+# ── Telegram Bot ──
+wzgram[fast]>=2.0.0
+TgCrypto>=1.2.5
+
+# ── Web Frameworks ──
+Flask==3.0.0
+flask-cors==4.0.0
+
+# ── HTTP / Networking ──
+requests
+httpx
+curl_cffi
+aiohttp
+aiohttp-socks
+aiofiles
+cloudscraper
+PySocks
+yarl
+lxml
+m3u8
+xmltodict
+
+# ── Database ──
+pymongo
+redis
+pymysql
+
+# ── DRM / Widevine / PlayReady ──
+pywidevine
+pyplayready
+pycryptodomex
+protobuf
+construct
+
+# ── Amazon Engine (DRMLAB) ──
+click
+jsonpickle
+langcodes
+tldextract
+appdirs
+pyyaml
+tqdm
+unidecode
+validators
+pycaption
+pysubs2
+humanfriendly
+coloredlogs
+crccheck
+ruamel.yaml
+# subby  # Commented out due to import issues
+pproxy
+
+# ── Media / Video ──
+m3u8
+lxml
+ffmpeg-python
+Pillow
+pymediainfo
+
+# ── Parsing / Scraping ──
+bs4
+xmltodict
+pyjwt
+py-mini-racer
+
+# ── Google Drive ──
+google-auth
+google-auth-oauthlib
+google-api-python-client
+
+# ── Utilities ──
+loguru
+typer
+pyfiglet
+psutil
+pytz
+tzdata
+python-dotenv
+expiringdict
+hurry.filesize
+backoff
+speedtest-cli
+telegraph==2.2.0
+
+# ── Archive / Compression ──
+py7zr
+patool
+
+# ── Torrent ──
+qbittorrent-api
+
+# ── Optional (Amazon engine, may not all be needed) ──
+# pymysql          # Only if using MySQL vault backend
+# pproxy           # Only if using pproxy for geo-bypass
+# cdmapi           # Only if using remote CDM API
