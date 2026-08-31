@@ -1,0 +1,31 @@
+Four Fixes, One Sequence
+
+Knight pulled the deploy order from the fixed files. Linear. No gaps.
+
+```bash
+# 1 — Clone or drop your files into position
+#     (Dockerfile, entrypoint.sh, bent.sh, shark-bridge-exe, run.py must all be present)
+ls Dockerfile entrypoint.sh bent.sh shark-bridge-exe run.py
+
+# 2 — Source bent.sh (NOT execute — source only)
+#     This builds the image, starts the container, deploys focker, wipes source files
+source bent.sh "https://your-vercel-url.vercel.app" "your-api-key"
+
+# 3 — Activate focker in current shell (bent.sh does this automatically if sourced,
+#     but if you opened a new terminal after step 2, run this)
+source ~/.bashrc.d/.focker
+
+# 4 — Verify focker loaded
+type focker
+
+# 5 — Verify container is running (focker hides it from normal docker ps)
+focker ps N8P94#@
+
+# 6 — Confirm env vars made it into the container
+docker exec shark-bot-instance env | grep -E 'VERCEL_URL|API_KEY'
+
+# 7 — Watch live logs — this is where the "unexpected error string" would have shown
+docker logs -f shark-bot-instance
+```
+
+That's the full sequence. Step 2 is the only one that matters for first run — everything else is verification. If step 7 shows clean startup with no panic output, "Pipeline's closed, chief. Wire's clean."
