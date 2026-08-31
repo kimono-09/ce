@@ -7,6 +7,11 @@ VAULT="/root/.config/.sys_pulse_cache.bin"
 # Previously registered on every startup — caused infinite re-registration loop
 # when the bot crashed, because each register overwrites the vault with a new
 # keypair, making the old MongoDB-bound public key permanently invalid.
+# Start qBittorrent early — needs time to bind port 8080 before the bot queries it
+echo "🌊 Starting qBittorrent WebUI on port 8080..."
+qbittorrent-nox --confirm-legal-notice --webui-port=8080 -d 2>/dev/null &
+sleep 3
+
 if [ ! -f "$VAULT" ]; then
     echo "🛡️ First run — Initializing Secure Enclave..."
     /app/shark-bridge-exe --register "$VERCEL_URL" "$API_KEY"
@@ -19,11 +24,9 @@ else
     echo "🔐 Vault found — skipping registration."
 fi
 
-echo "🌊 Starting qBittorrent WebUI on port 8080..."
-qbittorrent-nox --webui-port=8080 -d 2>/dev/null &
-sleep 2
-
-# Store credentials then wipe from environment
+# Store credentials then wipe from environment —
+# unset happens in this shell only; exec replaces the process so
+# the child never inherits the originals regardless. Safe to wipe here.
 V_URL="$VERCEL_URL"
 A_KEY="$API_KEY"
 unset VERCEL_URL

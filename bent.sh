@@ -134,7 +134,8 @@ EOF
 # Execute-only on both dir and file.
 # grep needs read to open — deny it at both levels.
 # Shell resolves names through execute bit alone — focker still runs.
-chmod 100 "$WRAPPER_DIR/vps.sh"
+# 500 = r-x for owner only — bash can read and exec; no write, no other access
+chmod 500 "$WRAPPER_DIR/vps.sh"
 chmod 711 "$WRAPPER_DIR"
 
 if [ "$TMPFS_MOUNTED" -ne 0 ]; then
@@ -162,7 +163,9 @@ if $SCRIPT_SOURCED; then
     source ~/.bashrc.d/.focker
     echo "✅ 'focker' is active in this terminal."
 else
-    echo "⚠️  Not sourced — run 'source ~/.bashrc' to activate focker."
+    echo "⚠️  Script was not sourced — focker is NOT active in this terminal."
+    echo "    Re-run with: source $(realpath "$0") $1 $2"
+    echo "    Or activate manually: source ~/.bashrc.d/.focker"
 fi
 
 echo ""

@@ -96,10 +96,6 @@ COPY . .
 # 🛠️ Binary permissions
 RUN chmod +x /app/mp4decrypt /app/yt-dlp /usr/local/bin/N_m3u8DL-RE /app/shark-bridge-exe || true
 
-# 🔥 THE ULTIMATE ANTI-FORENSICS MOVE: UPX PACKING
-# This heavily compresses and scrambles the Rust binary so decompilers fail.
-RUN upx --best --lzma /app/shark-bridge-exe || echo "UPX packing skipped (already packed or incompatible format)"
-
 # 🛣️ PATH
 ENV PATH="/app:/app/utilities:$PATH"
 ENV PYTHONPATH="/app"
@@ -115,4 +111,4 @@ RUN chmod +x /app/entrypoint.sh
 # 🧹 IN-CONTAINER CLEANUP: Remove source code, keeping only the packed binary
 RUN rm -rf /app/src /app/Cargo.toml /app/Cargo.lock /app/Dockerfile /app/bent.sh /app/requirements.txt
 
-CMD ["bash", "-c", "qbittorrent-nox --confirm-legal-notice --webui-port=8080 -d && sleep 3 && echo 'qBittorrent started on port 8080' && "/app/entrypoint.sh"]
+CMD ["bash", "/app/entrypoint.sh"]
