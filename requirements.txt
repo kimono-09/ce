@@ -1,16 +1,15 @@
-# ═══════════════════════════════════════════════════════
-# OTTLI Bot — Complete requirements.txt
-# ═══════════════════════════════════════════════════════
-
-# ── Telegram Bot ──
+# Telegram
 wzgram[fast]>=2.0.0
 TgCrypto>=1.2.5
+warpcrypto>=2.0.6
+imdbio>=0.0.8
+pycountry>=24.6.1
 
-# ── Web Frameworks ──
+# Web
 Flask==3.0.0
 flask-cors==4.0.0
 
-# ── HTTP / Networking ──
+# Networking
 requests
 httpx
 curl_cffi
@@ -24,27 +23,28 @@ lxml
 m3u8
 xmltodict
 
-# ── Database ──
+# Database
 pymongo
 redis
 pymysql
 
-# ── DRM / Widevine / PlayReady ──
+# DRM
 pywidevine
 pyplayready
 pycryptodomex
 protobuf
-construct
+# pywidevine/pyplayready use the pre-2.10 Construct API (Const subcon/value order)
+construct==2.8.8
 
-# ── Amazon Engine (DRMLAB) ──
+# Amazon / Utilities
 click
 jsonpickle
 langcodes
 tldextract
 appdirs
-pyyaml
+PyYAML
 tqdm
-unidecode
+Unidecode
 validators
 pycaption
 pysubs2
@@ -52,28 +52,25 @@ humanfriendly
 coloredlogs
 crccheck
 ruamel.yaml
-# subby  # Commented out due to import issues
 pproxy
 
-# ── Media / Video ──
-m3u8
-lxml
+# Media
 ffmpeg-python
 Pillow
 pymediainfo
 
-# ── Parsing / Scraping ──
-bs4
-xmltodict
-pyjwt
+# Parsing
+beautifulsoup4
+PyJWT
 py-mini-racer
 
-# ── Google Drive ──
+# Google Drive
 google-auth
 google-auth-oauthlib
 google-api-python-client
 
-# ── Utilities ──
+# General Utilities
+qrcode[pil]
 loguru
 typer
 pyfiglet
@@ -87,14 +84,16 @@ backoff
 speedtest-cli
 telegraph==2.2.0
 
-# ── Archive / Compression ──
+# Archive
 py7zr
 patool
 
-# ── Torrent ──
+# Torrent
 qbittorrent-api
+language_data
 
-# ── Optional (Amazon engine, may not all be needed) ──
-# pymysql          # Only if using MySQL vault backend
-# pproxy           # Only if using pproxy for geo-bypass
-# cdmapi           # Only if using remote CDM API
+# Browser Arkose (HBO Max SG proxy + Ghost Cursor) - cf-bypass style
+playwright>=1.45
+playwright-stealth>=1.0.6
+certifi
+mutagen
