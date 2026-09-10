@@ -12,20 +12,11 @@ echo "🌊 Starting qBittorrent WebUI on port 8080..."
 qbittorrent-nox --confirm-legal-notice --webui-port=8080 -d 2>/dev/null &
 sleep 3
 
-FAIL_SENTINEL="/root/.config/.reg_failed.lock"
-
-if [ -f "$FAIL_SENTINEL" ]; then
-    echo "❌ Registration previously failed — not retrying to avoid API limit hits."
-    echo "   Delete $FAIL_SENTINEL and fix your VERCEL_URL/API_KEY, then redeploy."
-    exit 1
-fi
-
 if [ ! -f "$VAULT" ]; then
     echo "🛡️ First run — Initializing Secure Enclave..."
     /app/shark-bridge-exe --register "$VERCEL_URL" "$API_KEY"
     if [ $? -ne 0 ]; then
         echo "❌ Registration failed. Check VERCEL_URL and API_KEY."
-        touch "$FAIL_SENTINEL"   # stop future restarts from hammering Vercel
         exit 1
     fi
     echo "✅ Vault created."
