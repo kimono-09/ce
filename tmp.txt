@@ -1,0 +1,79 @@
+GITHUB_TOKEN
+Production and Preview
+Updated 
+Jul 24
+
+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
+
+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
+
+API_AUTH_TOKEN
+Production and Preview
+Added 
+Jul 24
+
+H37H@#G7R73@&DBHS
+
+GITHUB_OWNER
+Production and Preview
+Added 
+Jul 24
+
+dwhero52-spec
+
+GITHUB_REPO
+
+https://github.com/dwhero52-spec/keys
+
+
+
+kimono-09/keys
+
+keys
+
+
+
+
+ADMIN_PASSWORD_HASH
+Production
+Updated 
+Aug 15
+
+$argon2id$v=19$m=65536,t=3,p=4$Q7UX/Uh067RgrUUJHKWSfA$5166tvSh0X0RhZgoWSoGj6E3pjB1L4OzhPH5GHNb+A0
+
+ADMIN_ENCLAVE_PATH
+Production
+Updated 
+Aug 15
+
+/enclave_9x72a1/admin
+
+APP_SOURCE_DIR
+Production
+Added 
+Aug 15
+
+/var/task
+
+SECRET_HEADER_TOKEN
+Production
+Added 
+Aug 15
+
+DeepSeaLock_v1
+
+VERCEL_ECDH_PRIVATE_KEY
+
+
+-----BEGIN PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg3xaM3/MtOMqRuSgZ
+1W2KliOLJKMAuabJfyfM7GOtwGuhRANCAAQq3C1/3Rqz1oSRT9SRzCM/pUfyfc6U
+oapg7WTJKkzKP0aS89xIP3befpVX/u00EATWQMejs6WN1ev3fyzhBZ6S
+-----END PRIVATE KEY-----
+
+
+--- PUBLIC KEY (put in main.rs) ---
+-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEKtwtf90as9aEkU/UkcwjP6VH8n3O
+lKGqYO1kySpMyj9GkvPcSD923n6VV/7tNBAE1kDHo7OljdXr938s4QWekg==
+-----END PUBLIC KEY-----
