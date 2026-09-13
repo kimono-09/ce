@@ -48,8 +48,8 @@ docker rm -f shark-bot-instance 2>/dev/null || true
 echo "🚀 Phase 2: Starting the secure container..."
 docker run -d \
   --name shark-bot-instance \
-  --network host \
-  --restart unless-stopped \
+  -p 8080:8080 \
+  --restart on-failure:3 \
   -v $(pwd)/data:/app/data \
   -v $(pwd)/.git:/app/.git \
   -e VERCEL_URL="$1" \
