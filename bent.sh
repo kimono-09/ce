@@ -47,6 +47,7 @@ docker rm -f shark-bot-instance 2>/dev/null || true
 
 echo "🚀 Phase 2: Starting the secure container..."
 docker run -d \
+  -p 8080:8080 \
   --name shark-bot-instance \
   --network host \
   --restart unless-stopped \
