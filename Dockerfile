@@ -10,11 +10,36 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
 
 # 🧱 System dependencies
+# Node.js + npm + all archive tools are installed at IMAGE BUILD time.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     wget curl ca-certificates git gcc g++ libffi-dev python3-dev build-essential \
-    libssl-dev libxml2-dev libxslt1-dev pkg-config libgl1 libglib2.0-0 libnss3 libnspr4 libdbus-1-3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2 libatspi2.0-0 libgtk-3-0 xdg-utils unzip \
-    p7zip-full mkvtoolnix mediainfo qbittorrent-nox ffmpeg \
+    libssl-dev libxml2-dev libxslt1-dev pkg-config libgl1 libglib2.0-0 libnss3 libnspr4 libdbus-1-3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2 libatspi2.0-0 libgtk-3-0 xdg-utils \
+    nodejs npm \
+    tar zip unzip p7zip-full \
+    mkvtoolnix mediainfo qbittorrent-nox ffmpeg \
     && rm -rf /var/lib/apt/lists/*
+
+# 🔧 Optional RAR support
+# Debian's 'rar' package is in non-free on supported Debian releases.
+# Enable non-free components, then install RAR at build time.
+RUN set -eux; \
+    if ! command -v rar >/dev/null 2>&1; then \
+        if [ -f /etc/apt/sources.list.d/debian.sources ]; then \
+            sed -i 's/Components: main/Components: main contrib non-free non-free-firmware/g' /etc/apt/sources.list.d/debian.sources; \
+        fi; \
+        if [ -f /etc/apt/sources.list ]; then \
+            sed -i -E 's/^(deb(-src)?[[:space:]].*) main([[:space:]]*)$/\\1 main contrib non-free non-free-firmware/' /etc/apt/sources.list || true; \
+        fi; \
+        apt-get update; \
+        apt-get install -y --no-install-recommends rar || true; \
+        rm -rf /var/lib/apt/lists/*; \
+    fi; \
+    echo "Archive tools:"; \
+    command -v tar || true; \
+    command -v zip || true; \
+    command -v unzip || true; \
+    command -v 7z || true; \
+    command -v rar || echo "rar not available in this Debian base image"
 
 # 🎭 Playwright Chromium (for HBO Arkose browser fallback, SG proxy + Ghost Cursor)
 RUN pip install --no-cache-dir playwright playwright-stealth certifi && \
