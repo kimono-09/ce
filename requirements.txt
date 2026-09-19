@@ -13,6 +13,7 @@ flask-cors==4.0.0
 requests
 httpx
 ntplib
+
 curl_cffi
 aiohttp
 aiohttp-socks
@@ -73,6 +74,7 @@ google-api-python-client
 # General Utilities
 qrcode[pil]
 loguru
+langcodes
 typer
 pyfiglet
 psutil
