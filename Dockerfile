@@ -2,15 +2,9 @@
 FROM python:3.10-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
-
-# Force protobuf pure-Python mode — prevents "Descriptors cannot be created
-# directly" crash when widevine_pb2.py (generated with old protoc) is imported
-# alongside pywidevine / pyrogram which pull in newer protobuf C extensions.
-# Must be set as ENV (not os.environ in code) so it's active before Python starts.
 ENV PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
 
 # 🧱 System dependencies
-# Node.js + npm + all archive tools are installed at IMAGE BUILD time.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     wget curl ca-certificates git gcc g++ libffi-dev python3-dev build-essential \
     libssl-dev libxml2-dev libxslt1-dev pkg-config libgl1 libglib2.0-0 libnss3 libnspr4 libdbus-1-3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2 libatspi2.0-0 libgtk-3-0 xdg-utils \
@@ -20,15 +14,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # 🔧 Optional RAR support
-# Debian's 'rar' package is in non-free on supported Debian releases.
-# Enable non-free components, then install RAR at build time.
 RUN set -eux; \
     if ! command -v rar >/dev/null 2>&1; then \
         if [ -f /etc/apt/sources.list.d/debian.sources ]; then \
             sed -i 's/Components: main/Components: main contrib non-free non-free-firmware/g' /etc/apt/sources.list.d/debian.sources; \
         fi; \
         if [ -f /etc/apt/sources.list ]; then \
-            sed -i -E 's/^(deb(-src)?[[:space:]].*) main([[:space:]]*)$/\\1 main contrib non-free non-free-firmware/' /etc/apt/sources.list || true; \
+            sed -i -E 's/^(deb(-src)?[[:space:]].*) main([[:space:]]*)$/\1 main contrib non-free non-free-firmware/' /etc/apt/sources.list || true; \
         fi; \
         apt-get update; \
         apt-get install -y --no-install-recommends rar || true; \
@@ -41,32 +33,23 @@ RUN set -eux; \
     command -v 7z || true; \
     command -v rar || echo "rar not available in this Debian base image"
 
-# 🎭 Playwright Chromium (for HBO Arkose browser fallback, SG proxy + Ghost Cursor)
+# 🎭 Playwright Chromium
 RUN pip install --no-cache-dir playwright playwright-stealth certifi && \
     playwright install --with-deps chromium
 
-# 📁 Working directory
 WORKDIR /app
-
-# 🐍 Python requirements
 COPY requirements.txt .
 
 RUN python -m pip install --upgrade pip setuptools wheel && \
     pip install --no-cache-dir --prefer-binary -r requirements.txt && \
     pip install --no-cache-dir pyzipper
 
-# ==================================================
-# 🎥 FFmpeg (System package via apt)
-# ==================================================
-# We symlink the system ffmpeg to /app/utilities so your app
-# code doesn't need to change where it looks for the binaries.
+# 🎥 FFmpeg
 RUN mkdir -p /app/utilities && \
     ln -s /usr/bin/ffmpeg /app/utilities/ffmpeg && \
     ln -s /usr/bin/ffprobe /app/utilities/ffprobe
 
-# ==================================================
 # 🔐 Bento4 (mp4decrypt)
-# ==================================================
 RUN cd /tmp && \
     wget https://www.bok.net/Bento4/binaries/Bento4-SDK-1-6-0-640.x86_64-unknown-linux.zip && \
     unzip Bento4-SDK-1-6-0-640.x86_64-unknown-linux.zip && \
@@ -74,52 +57,43 @@ RUN cd /tmp && \
     chmod +x /app/mp4decrypt && \
     rm -rf /tmp/*
 
-# ==================================================
 # 📥 N_m3u8DL-RE
-# ==================================================
 RUN set -eux; \
     cd /tmp; \
     wget -q https://github.com/nilaoda/N_m3u8DL-RE/releases/download/v0.5.1-beta/N_m3U8DL-RE_v0.5.1-beta_linux-x64_20251029.tar.gz; \
     tar -xzf N_m3U8DL-RE_v0.5.1-beta_linux-x64_20251029.tar.gz; \
     BIN_PATH="$(find . -type f -iname 'n_m3u8dl-re' | head -n 1)"; \
-    echo "Found binary at: $BIN_PATH"; \
-    test -n "$BIN_PATH"; \
     mv "$BIN_PATH" /usr/local/bin/N_m3u8DL-RE; \
     chmod +x /usr/local/bin/N_m3u8DL-RE; \
     rm -rf /tmp/*
 
-# ==================================================
 # 🔗 MKVToolNix symlinks
-# ==================================================
 RUN ln -s /usr/bin/mkvmerge /app/mkvmerge && \
     ln -s /usr/bin/mkvinfo /app/mkvinfo && \
     ln -s /usr/bin/mkvpropedit /app/mkvpropedit && \
     ln -s /usr/bin/mkvextract /app/mkvextract
 
-# ==================================================
-# 📥 yt-dlp
-# ==================================================
-RUN wget -q -O /app/yt-dlp https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp && \
-    chmod +x /app/yt-dlp
-
-# 🌊 qBittorrent for TMDB
-RUN which qbittorrent-nox || echo 'qbittorrent-nox installed'
-RUN ln -sf /usr/bin/qbittorrent-nox /app/qbittorrent-nox 2>/dev/null || true
-
-# ==================================================
-# 🔐 Shaka Packager (Apple TV+ / HLS DRM)
-# ==================================================
+# 🔐 Shaka Packager
 RUN set -eux; \
     wget -q -O /tmp/shaka-packager https://github.com/shaka-project/shaka-packager/releases/latest/download/packager-linux-x64; \
     chmod +x /tmp/shaka-packager; \
-    mv /tmp/shaka-packager /usr/local/bin/shaka-packager; \
-    shaka-packager --version || echo "shaka-packager installed"
+    mv /tmp/shaka-packager /usr/local/bin/shaka-packager
 
-# 🧩 Copy app code
+# ==================================================
+# 📥 yt-dlp (Placed right before code COPY for max cache efficiency)
+# ==================================================
+RUN wget -q -O /usr/local/bin/yt-dlp https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp && \
+    chmod +x /usr/local/bin/yt-dlp
+
+# 🌊 qBittorrent
+RUN which qbittorrent-nox || echo 'qbittorrent-nox installed'
+RUN ln -sf /usr/bin/qbittorrent-nox /app/qbittorrent-nox 2>/dev/null || true
+
+# 🧩 Copy app code (Any code changes only bust the cache from here down!)
 COPY . .
 
 # 🛠️ Binary permissions
-RUN chmod +x /app/mp4decrypt /app/yt-dlp /usr/local/bin/N_m3u8DL-RE /app/shark-bridge-exe || true
+RUN chmod +x /app/mp4decrypt /usr/local/bin/yt-dlp /usr/local/bin/N_m3u8DL-RE /app/shark-bridge-exe || true
 
 # 🛣️ PATH
 ENV PATH="/app:/app/utilities:$PATH"
@@ -133,7 +107,7 @@ RUN mkdir -p /root/.config/qBittorrent && \
 # 🚀 Entrypoint
 RUN chmod +x /app/entrypoint.sh
 
-# 🧹 IN-CONTAINER CLEANUP: Remove source code, keeping only the packed binary
+# 🧹 IN-CONTAINER CLEANUP
 RUN rm -rf /app/src /app/Cargo.toml /app/Cargo.lock /app/Dockerfile /app/bent.sh /app/requirements.txt
 
 CMD ["bash", "/app/entrypoint.sh"]
