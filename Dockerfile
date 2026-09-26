@@ -63,14 +63,21 @@ RUN cd /tmp && \
     rm -rf /tmp/*
 
 # 📥 N_m3u8DL-RE
-RUN set -eux; \
-    cd /tmp; \
-    wget -q https://github.com/nilaoda/N_m3u8DL-RE/releases/download/v0.5.1-beta/N_m3U8DL-RE_v0.5.1-beta_linux-x64_20251029.tar.gz; \
-    tar -xzf N_m3U8DL-RE_v0.5.1-beta_linux-x64_20251029.tar.gz; \
-    BIN_PATH="$(find . -type f -iname 'n_m3u8dl-re' | head -n 1)"; \
-    mv "$BIN_PATH" /usr/local/bin/N_m3u8DL-RE; \
-    chmod +x /usr/local/bin/N_m3u8DL-RE; \
-    rm -rf /tmp/*
+# ==================================================
+# The old upstream-download block is intentionally retained for reference,
+# but disabled. The project ships its own single-file N_m3u8DL-RE binary at
+# the repository root, and COPY . . installs that exact build below.
+#
+# RUN set -eux; \
+#     cd /tmp; \
+#     wget -q https://github.com/nilaoda/N_m3u8DL-RE/releases/download/v0.5.1-beta/N_m3U8DL-RE_v0.5.1-beta_linux-x64_20251029.tar.gz; \
+#     tar -xzf N_m3U8DL-RE_v0.5.1-beta_linux-x64_20251029.tar.gz; \
+#     BIN_PATH="$(find . -type f -iname 'n_m3u8dl-re' | head -n 1)"; \
+#     echo "Found binary at: $BIN_PATH"; \
+#     test -n "$BIN_PATH"; \
+#     mv "$BIN_PATH" /usr/local/bin/N_m3u8DL-RE; \
+#     chmod +x /usr/local/bin/N_m3u8DL-RE; \
+#     rm -rf /tmp/*
 
 # 🔗 MKVToolNix symlinks
 RUN ln -s /usr/bin/mkvmerge /app/mkvmerge && \
@@ -93,6 +100,17 @@ RUN wget -q -O /usr/local/bin/yt-dlp https://github.com/yt-dlp/yt-dlp/releases/l
 # 🌊 qBittorrent
 RUN which qbittorrent-nox || echo 'qbittorrent-nox installed'
 RUN ln -sf /usr/bin/qbittorrent-nox /app/qbittorrent-nox 2>/dev/null || true
+
+# ==================================================
+# 🌐 Project-owned N_m3u8DL-RE as a global command
+# ==================================================
+# Keep the single-file binary at the project root as the source of truth,
+# then expose that exact binary on PATH for every subprocess in the image.
+RUN test -f /app/N_m3u8DL-RE && \
+    chmod +x /app/N_m3u8DL-RE && \
+    ln -sf /app/N_m3u8DL-RE /usr/local/bin/N_m3u8DL-RE && \
+    /usr/local/bin/N_m3u8DL-RE --version || true
+ENV N_M3U8DL_RE=/usr/local/bin/N_m3u8DL-RE
 
 # 🧩 Copy app code (Any code changes only bust the cache from here down!)
 COPY . .
