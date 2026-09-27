@@ -68,16 +68,16 @@ RUN cd /tmp && \
 # but disabled. The project ships its own single-file N_m3u8DL-RE binary at
 # the repository root, and COPY . . installs that exact build below.
 #
- RUN set -eux; \
-     cd /tmp; \
-     wget -q https://github.com/kiplo74/N_m3u8DL-RE/releases/download/N_m3u8dl-re/N_m3u8DL-RE.tar.gz \
-     tar -xzf N_m3U8DL-RE.tar.gz; \
-     BIN_PATH="$(find . -type f -iname 'n_m3u8dl-re' | head -n 1)"; \
-     echo "Found binary at: $BIN_PATH"; \
-     test -n "$BIN_PATH"; \
-     mv "$BIN_PATH" /usr/local/bin/N_m3u8DL-RE; \
-     chmod +x /usr/local/bin/N_m3u8DL-RE; \
-     rm -rf /tmp/*
+RUN set -eux; \
+    cd /tmp; \
+    wget -q "https://github.com/kiplo74/N_m3u8DL-RE/releases/download/N_m3u8dl-re/N_m3u8DL-RE.tar.gz"; \
+    tar -xzf "N_m3u8DL-RE.tar.gz"; \
+    BIN_PATH="$(find /tmp -type f -iname 'n_m3u8dl-re' | head -n 1)"; \
+    echo "Found binary at: $BIN_PATH"; \
+    test -n "$BIN_PATH"; \
+    mv "$BIN_PATH" /usr/local/bin/N_m3u8DL-RE; \
+    chmod +x /usr/local/bin/N_m3u8DL-RE; \
+    rm -rf /tmp/*
 
 # 🔗 MKVToolNix symlinks
 RUN ln -s /usr/bin/mkvmerge /app/mkvmerge && \
