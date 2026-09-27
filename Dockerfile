@@ -70,7 +70,7 @@ RUN cd /tmp && \
 #
 RUN set -eux; \
     cd /tmp; \
-    wget -q "https://github.com/kiplo74/N_m3u8DL-RE/releases/download/N_m3u8dl-re/N_m3u8DL-RE.tar.gz"; \
+    wget -q "https://github.com/harshit-bit10/N_m3u8DL-RE/releases/download/n_m3u8dl-re/N_m3u8DL-RE.tar.gz"; \
     tar -xzf "N_m3u8DL-RE.tar.gz"; \
     BIN_PATH="$(find /tmp -type f -iname 'n_m3u8dl-re' | head -n 1)"; \
     echo "Found binary at: $BIN_PATH"; \
